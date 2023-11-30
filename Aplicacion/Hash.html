@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="./img/icon.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" href="style.css">
+    <title>CoCoin</title>
+</head>
+
+<body>
+    <nav class="navbar bg-dark navbar-expand-lg bg-body-tertiary" data-bs-theme="dark">
+        <div class="container-fluid">
+
+            <a class="navbar-brand" href="#">
+                <img src="./img/icon.png" alt="Logo" width="30" height="24" class="d-inline-block align-text-top">
+                CoCoin
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="text-end me-5">
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" href="./Hash.html">Hash</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="./Bloque.html">Bloques</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="./Transaccion.html">Transacciones</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="./solana.html">solana</a>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-2">
+        <h1 class="fw-medium">Hash AES-256</h1>
+
+        <div class="well ps-4 me-5 pb-3" id="well1">
+            <form class="form-horizontal">
+                <div class="form-group">
+                    <label class="col-sm-5 control-label" for="block1chain1nonce">Public Key:</label>
+                    <div class="col-sm-10">
+                        <input class="form-control" id="hash" type="text" value="11316">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-2 control-label" for="data">Data:</label>
+                    <div class="col-sm-10">
+                        <textarea class="form-control" id="data" rows="5"></textarea>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label" for="hash">Hash:</label>
+                    <div class="col-sm-10">
+                        <input class="form-control" id="hash" type="text" disabled>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+        crossorigin="anonymous"></script>
+    <script>
+        //con fetch llama a flask
+
+        //post
+        document.querySelector("form").addEventListener("submit", function (e) {
+            // Enviar la petición al servidor
+            const datos = new FormData(document.querySelector("form"))
+            const data = {
+                nombre: datos.get("nombre"),
+                nDoc: datos.get("nDoc"),
+                tipoDoc: datos.get("tipoDoc"),
+                apellido: datos.get("apellido"),
+                direccion: datos.get("direccion"),
+                correo: datos.get("correo"),
+                celular: datos.get("celular")
+
+            };
+            const jsonData = JSON.stringify(data);
+
+            fetch("http://localhost:3000/api/personas", {
+                method: "POST",
+                body: jsonData,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(function (response) {
+                    if (response.status === 400) {
+                        $('#alerta-w').hide();
+                        $('#alerta-s').hide();
+                        $('#alerta-d').show();
+                    } else if (response.status === 409) {
+                        $('#alerta-d').hide();
+                        $('#alerta-s').hide();
+                        $('#alerta-w').show();
+                    } else if (response.status === 201) {
+                        $('#alerta-d').hide();
+                        $('#alerta-w').hide();
+                        $('#alerta-s').show();
+                        //location.href = "./tabla.html";
+                    }
+                })
+                .catch(function (error) {
+                    alert("Error en la petición");
+                });
+            e.preventDefault();
+        });
+
+        //get
+        const traerDatos = async () => {
+            const response = await fetch('http://localhost:3000/api/tipodoc')
+            const data = await response.json()
+
+            console.log(data)
+            var miTipo = document.getElementById('tipos');
+
+            for (let i = 0; i < data.length; i++) {
+                miTipo.innerHTML += crearTipo(data[i])
+            }
+        }
+        traerDatos()
+
+        function crearTipo(tipo) {
+            return `<option value="${tipo[0]}">${tipo[1]}</option>`
+        }
+
+        e.preventDefault();
+
+        
+        //put
+        function Bd_put() {
+            const datos = new FormData(document.querySelector("form"))
+            const data = {
+                nombre: datos.get("nombre"),
+                nDoc: datos.get("nDoc"),
+                tipoDoc: datos.get("tipoDoc"),
+                apellido: datos.get("apellido"),
+                direccion: datos.get("direccion"),
+                correo: datos.get("correo"),
+                celular: datos.get("celular")
+
+            };
+            const jsonData = JSON.stringify(data);
+
+            const url = 'http://localhost:3000/api/personas/' + datos.get("tipoDoc") + '/' + datos.get("nDoc");
+            alert(url);
+            const form = document.querySelector('form');
+            const options = {
+                method: 'PUT',
+                body: jsonData,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            };
+            fetch(url, options)
+                .then(function (response) {
+                    if (response.status === 400) {
+                        alert("400");
+                    } else if (response.status === 500) {
+                        alert("500");
+                    } else if (response.status === 404) {
+                        alert("404");
+                    } else if (response.status === 200) {
+                        location.href = "./tabla.html";
+                    }
+                })
+                .then(data => console.log(data))
+                .catch(error => console.error(error));
+        }
+
+    </script>
+</body>
+
+</html>
